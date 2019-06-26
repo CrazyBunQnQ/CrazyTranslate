@@ -14,3 +14,7 @@ if (typeof (orig) === "string") {
   $ui.alert("input: " + orig + ";\ntype: " + typeof (orig))
   $ui.alert("暂时不支持此格式，敬请期待！")
 }
+
+// test
+var tkJS = require('scripts/tk')
+tkJS.getTK()
