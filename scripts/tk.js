@@ -72,15 +72,17 @@ function getTK2(s, tkk) {
     console.log("aa = for ... r(aa, Sb) = " + aa)
     aa = r(aa, Zb)
     console.log("aa = r(aa, Zb) = " + aa)
-    aa ^= kb
+    aa = (aa ^ kb) >>> 0
+    console.log("aa = aa ^ kb = " + aa)
     aa %= 1E6
+    console.log("aa = aa %= 1E6 = " + aa)
     var aakb = aa
     aakb ^= ka
     console.log("aa = " + aa)
     console.log("ka = " + ka)
     console.log("aa^ka = " + aa ^ ka)
     console.log("aakb = " + aakb)
-    return aa + "." + aa ^ ka
+    return aa + "." + ((aa ^ ka) >>> 0)
 }
 
 function r(a, b) {
@@ -96,22 +98,23 @@ function r(a, b) {
             dd = suint32(d)
         }
         if ((b[c + 1] + "") == Yb) {
-            console.log("dd = " + a + " >> " + dd)
+            // console.log("dd = " + a + " >> " + dd)
             dd = (a >>> dd) >>> 0
-            console.log("dd = a >> dd =" + dd)
+            // console.log("dd = a >> dd =" + dd)
         } else {
-            console.log("dd = " + a + " << " + dd)
+            // console.log("dd = " + a + " << " + dd)
             dd = (a << dd) >>> 0
-            console.log("dd = a << dd = " + dd)
+            // console.log("dd = a << dd = " + dd)
         }
         if ((b[c] + "") == Yb) {
-            // TODO 这里有问题
             console.log("a = " + a + " + " + dd + " & 4294967295")
-            a = a + dd & 4294967295
-            console.log("a = a + dd & 4294967295 = " + a)
+            var tmp = (dd & 4294967295) >>> 0
+            a = a + tmp
+            console.log("a = a + dd & 4294967295 = " + a + ", tmp=" + tmp)
         } else {
+            // 这里不确定
             console.log("a = " + a + " ^ " + dd)
-            a = a ^ dd
+            a = (a ^ dd) >>> 0
             console.log("a = a ^ dd = " + a)
         }
     }
