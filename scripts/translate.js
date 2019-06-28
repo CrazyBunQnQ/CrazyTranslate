@@ -110,10 +110,8 @@ function translate(isGetTK) {
   console.log("translate.translate")
   $ui.loading("Translating...")
   if (haveToGetTK()) {
-    console.log("Get detailed translation...")
-    $ui.toast("Get detailed translation");
+    // $ui.toast("Get detailed translation");
     translateByTK()
-    $ui.loading(false);
   } else {
     var transLg = cnTest()
     $http.request({
@@ -145,6 +143,58 @@ function translate(isGetTK) {
   }
 }
 
+function detailedTranslation(tk) {
+  opts = { raw: true, from: "auto", to: "zh-CN" };
+  var languages = require('./languages');
+  var e;
+  [opts.from, opts.to].forEach(function (lang) {
+    if (lang && !languages.isSupported(lang)) {
+      e.message = 'The language \'' + lang + '\' is not supported';
+      $ui.alert({
+        title: "Not Support '" + lang + "'",
+        message: "The language '" + lang + "' is not supported",
+      });
+      $ui.loading(false);
+      return
+    }
+  })
+  console.log("get detailed translation")
+
+  $http.request({
+    method: "POST",
+    url: "http://translate.google.cn/translate_a/single",
+    header: {
+      // "User-Agent": "iOSTranslate",
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36",
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: {
+      "client": "gtx|t",
+      "dt": ['at', 'bd', 'ex', 'ld', 'md', 'qca', 'rw', 'rm', 'ss', 't'],
+      "sl": "en-US",
+      "tl": "zh-cn",
+      "hl": "zh-cn",
+      "q": $("textBg").text,
+      "ie": "UTF-8",
+      "oe": "UTF-8",
+      "otf": 1,
+      "ssel": 0,
+      "tsel": 0,
+      "kc": 7,
+      "tk": tk
+    },
+    handler: function (resp) {
+      $ui.loading(false)
+      console.log("detailed translation resp: " + resp)
+      var data = resp.data
+      console.log("detailed translation data: " + data)
+      var body = resp.body
+      console.log("detailed translation: " + body)
+
+    }
+  })
+}
+
 function translateByTK() {
   $http.get({
     url: homeURL,
@@ -154,6 +204,7 @@ function translateByTK() {
       console.log("tkk=" + tkk)
       var tk = getTK($("textBg").text, tkk)
       console.log("tk=" + tk)
+      detailedTranslation(tk)
     }
   });
 }
