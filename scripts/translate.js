@@ -16,7 +16,6 @@ var homeURL = "https://translate.google.cn"
 var tkkRegex = /tkk:'(\d+\.\d+)'/gi;
 
 function randomColor(Min, Max) {
-  console.log("translate.randomColor")
   var Range = Max - Min;
   var Rand = Math.random();
   var num = Min + Math.round(Rand * Range);
@@ -24,7 +23,6 @@ function randomColor(Min, Max) {
 }
 
 function translateView(orig) {
-  console.log("translate.translateView")
   // $ui.push({
   $ui.render({
     props: {
@@ -107,7 +105,6 @@ module.exports = {
 }
 
 function translate(isGetTK) {
-  console.log("translate.translate")
   $ui.loading("Translating...")
   if (haveToGetTK()) {
     // $ui.toast("Get detailed translation");
@@ -116,9 +113,9 @@ function translate(isGetTK) {
     var transLg = cnTest()
     $http.request({
       method: "POST",
-      url: "http://translate.google.cn/translate_a/single",
+      url: "https://translate.google.cn/translate_a/single",
       header: {
-        "User-Agent": "iOSTranslate",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36",
         "Content-Type": "application/x-www-form-urlencoded"
       },
       body: {
@@ -158,39 +155,45 @@ function detailedTranslation(tk) {
       return
     }
   })
-  console.log("get detailed translation")
 
+  sendPost(tk)
+}
+
+function sendPost(tk) {
   $http.request({
     method: "POST",
-    url: "http://translate.google.cn/translate_a/single",
+    url: "https://translate.google.cn/translate_a/single",
+    // client=webapp&sl=zh-CN&tl=en&hl=zh-CN&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&otf=1&ssel=3&tsel=3&kc=1&tk=712322.802833&q=哈哈
     header: {
       // "User-Agent": "iOSTranslate",
       "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36",
       "Content-Type": "application/x-www-form-urlencoded"
     },
     body: {
-      "client": "gtx|t",
-      "dt": ['at', 'bd', 'ex', 'ld', 'md', 'qca', 'rw', 'rm', 'ss', 't'],
+      "client": "webapp",
+      // "client": "webapp|gtx|t",
       "sl": "en-US",
-      "tl": "zh-cn",
-      "hl": "zh-cn",
-      "q": $("textBg").text,
+      "tl": "zh-CN",
+      "hl": "zh-CN",
+      "dt": "[at,t]",
       "ie": "UTF-8",
       "oe": "UTF-8",
       "otf": 1,
-      "ssel": 0,
-      "tsel": 0,
-      "kc": 7,
-      "tk": tk
+      "ssel": 3,
+      "tsel": 3,
+      "kc": 1,
+      "tk": tk,
+      "q": $("textBg").text
     },
     handler: function (resp) {
       $ui.loading(false)
-      console.log("detailed translation resp: " + resp)
+      console.log("resp type: " + typeof (resp))
+      console.log("resp: " + resp)
       var data = resp.data
-      console.log("detailed translation data: " + data)
-      var body = resp.body
-      console.log("detailed translation: " + body)
-
+      console.log("data type: " + typeof (data))
+      console.log("data: " + data)
+      var body = data[2]
+      console.log("body: " + body)
     }
   })
 }
