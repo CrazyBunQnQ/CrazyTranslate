@@ -117,40 +117,46 @@ module.exports = {
 
 function translate(isGetTK) {
   $ui.loading("Translating...")
-  if (haveToGetTK()) {
-    translateByTK()
+  if (isGetTK) {
+    var transWord = $("textBg").text
+    simpleTranslation()
+    translateByTK(transWord)
   } else {
-    var transLg = cnTest()
-    $http.request({
-      method: "POST",
-      url: "https://translate.google.cn/translate_a/single",
-      header: {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36",
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: {
-        "dt": "t",
-        "q": $("textBg").text,
-        "tl": transLg,
-        "ie": "UTF-8",
-        "sl": "auto",
-        "client": "ia",
-        "dj": "1"
-      },
-      handler: function (resp) {
-        $ui.loading(false)
-        var data = resp.data.sentences
-        var trans = ""
-        for (var i in data) {
-          var trans = trans + data[i].trans + "\n"
-        }
-        $("textBg").text = trans
-      }
-    })
+    simpleTranslation()
   }
 }
 
-function detailedTranslation(tk) {
+function simpleTranslation() {
+  var transLg = cnTest()
+  $http.request({
+    method: "POST",
+    url: "https://translate.google.cn/translate_a/single",
+    header: {
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36",
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: {
+      "dt": "t",
+      "q": $("textBg").text,
+      "tl": transLg,
+      "ie": "UTF-8",
+      "sl": "auto",
+      "client": "ia",
+      "dj": "1"
+    },
+    handler: function (resp) {
+      $ui.loading(false)
+      var data = resp.data.sentences
+      var trans = ""
+      for (var i in data) {
+        var trans = trans + data[i].trans + "\n"
+      }
+      $("textBg").text = trans
+    }
+  })
+}
+
+function detailedTranslation(tk, transWord) {
   opts = { raw: true, from: "auto", to: "zh-CN" };
   var languages = require('./languages');
   var e;
@@ -166,10 +172,10 @@ function detailedTranslation(tk) {
     }
   })
 
-  sendPost(tk)
+  sendPost(tk, transWord)
 }
 
-function sendPost(tk) {
+function sendPost(tk, transWord) {
   var dtQueryString = ""
   for (var i = 0; i < dt.length; i++) {
     dtQueryString += "&dt="
@@ -177,7 +183,7 @@ function sendPost(tk) {
   }
   $http.request({
     method: "POST",
-    url: "https://translate.google.cn/translate_a/single?client=webapp&sl=auto&tl=zh-CN&hl=zh-CN" + dtQueryString + "&otf=1&ssel=0&tsel=0&kc=7&tk=" + tk + "&q=" + $("textBg").text,
+    url: "https://translate.google.cn/translate_a/single?client=webapp&sl=auto&tl=zh-CN&hl=zh-CN" + dtQueryString + "&otf=1&ssel=0&tsel=0&kc=7&tk=" + tk + "&q=" + transWord,
     header: {
       "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36",
       "Content-Type": "application/x-www-form-urlencoded"
@@ -208,28 +214,28 @@ function showDetailedResult(body) {
 
   if (body[12]) {
     result += "英文释义: \n"
-    for (var i = 0; i<body[12].length;i++) {
+    for (var i = 0; i < body[12].length; i++) {
       var english = body[12][i]
       console.log("english.length=" + english.length + ", " + english[0] + ", " + english[1] + ", " + english[2])
       result += ("\n " + (i + 1) + ". " + english[0] + ": " + english[1][0][0] + "\n")
       result += ("     示例: " + english[1][0][2] + "\n")
     }
-    body[12].forEach(function(obj) {
+    body[12].forEach(function (obj) {
       console.log("obj.length: " + obj.length)
       console.log("obj[1].length: " + obj[1].length)
       // result += (" " + obj)
       // r[1].forEach(m => {
-        // const [explain, nvl, example] = m;
-        // output.items.push({
-          // title: explain,
-          // subtitle: `英文解释 ${partOfSpeech} 示例: ${example}`,
-          // quicklookurl: `https://translate.google.cn/#view=home&op=translate&sl=${to}&tl=${from}&text=${encodeURIComponent(translation[1])}`,
-          // arg: explain,
-          // text: {
-            // copy: explain,
-            // largetype: `${explain}\n"${example}"`
-          // }
-        // });
+      // const [explain, nvl, example] = m;
+      // output.items.push({
+      // title: explain,
+      // subtitle: `英文解释 ${partOfSpeech} 示例: ${example}`,
+      // quicklookurl: `https://translate.google.cn/#view=home&op=translate&sl=${to}&tl=${from}&text=${encodeURIComponent(translation[1])}`,
+      // arg: explain,
+      // text: {
+      // copy: explain,
+      // largetype: `${explain}\n"${example}"`
+      // }
+      // });
       // })
     })
   }
@@ -244,31 +250,31 @@ function showDetailedResult(body) {
 
   if (body[7])
     // console.log("body[7]=" + body[7] + ", body[7][0]=" + body[7][0])
-  if (body[7] && body[7][0]) {
-    var str = body[7][0];
-    str = str.replace(/<b><i>/g, '[');
-    str = str.replace(/<\/i><\/b>/g, ']');
-    result.from.text.value = str;
-    if (body[7][5] === true) {
-      // result.from.text.autoCorrected = true;
-    } else {
-      // result.from.text.didYouMean = true;
+    if (body[7] && body[7][0]) {
+      var str = body[7][0];
+      str = str.replace(/<b><i>/g, '[');
+      str = str.replace(/<\/i><\/b>/g, ']');
+      result.from.text.value = str;
+      if (body[7][5] === true) {
+        // result.from.text.autoCorrected = true;
+      } else {
+        // result.from.text.didYouMean = true;
+      }
     }
-  }
 
   $("textBg").text = result
 }
 
-function translateByTK() {
+function translateByTK(transWord) {
   $http.get({
     url: homeURL,
     handler: function (resp) {
       var data = resp.data;
       var tkk = tkkRegex.exec(data)[1]
       // console.log("tkk=" + tkk)
-      var tk = getTK($("textBg").text, tkk)
+      var tk = getTK(transWord, tkk)
       // console.log("tk=" + tk)
-      detailedTranslation(tk)
+      detailedTranslation(tk, transWord)
     }
   });
 }
