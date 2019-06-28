@@ -2,19 +2,14 @@ var homeURL = "https://translate.google.cn"
 var regex = /tkk:'(\d+\.\d+)'/gi;
 
 function getTK() {
-    console.log(homeURL)
     $http.get({
         url: homeURL,
         handler: function (resp) {
             var data = resp.data;
-            // console.log(data)
             var tkk = regex.exec(data)[1]
-            console.log(tkk)
+            console.log("tkk=" + tkk)
             var tk = getTK2("hello", tkk)
-            $ui.alert({
-                title: "token 计算结果",
-                message: "tkk = " + tkk + "\ntk = " + tk,
-            });
+            console.log("tk=" + tk)
         }
     });
 }
@@ -69,24 +64,13 @@ function getTK2(s, tkk) {
         aa += e[f]
         aa = r(aa, Sb)
     }
-    console.log("aa = for ... r(aa, Sb) = " + aa)
     aa = r(aa, Zb)
-    console.log("aa = r(aa, Zb) = " + aa)
     aa = (aa ^ kb) >>> 0
-    console.log("aa = aa ^ kb = " + aa)
-    aa %= 1E6
-    console.log("aa = aa %= 1E6 = " + aa)
-    var aakb = aa
-    aakb ^= ka
-    console.log("aa = " + aa)
-    console.log("ka = " + ka)
-    console.log("aa^ka = " + aa ^ ka)
-    console.log("aakb = " + aakb)
+    aa = aa % 1E6
     return aa + "." + ((aa ^ ka) >>> 0)
 }
 
 function r(a, b) {
-    console.log("a=" + a + ", b=" + b)
     var t = "a"
     var Yb = "+"
     for (var c = 0; c < b.length - 2; c += 3) {
@@ -98,24 +82,14 @@ function r(a, b) {
             dd = suint32(d)
         }
         if ((b[c + 1] + "") == Yb) {
-            // console.log("dd = " + a + " >> " + dd)
             dd = (a >>> dd) >>> 0
-            // console.log("dd = a >> dd =" + dd)
         } else {
-            // console.log("dd = " + a + " << " + dd)
             dd = (a << dd) >>> 0
-            // console.log("dd = a << dd = " + dd)
         }
         if ((b[c] + "") == Yb) {
-            console.log("a = " + a + " + " + dd + " & 4294967295")
-            var tmp = (dd & 4294967295) >>> 0
-            a = a + tmp
-            console.log("a = a + dd & 4294967295 = " + a + ", tmp=" + tmp)
+            a = a + (dd & 4294967295) >>> 0
         } else {
-            // 这里不确定
-            console.log("a = " + a + " ^ " + dd)
             a = (a ^ dd) >>> 0
-            console.log("a = a ^ dd = " + a)
         }
     }
     return a
