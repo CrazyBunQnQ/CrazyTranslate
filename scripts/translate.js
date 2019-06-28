@@ -12,6 +12,18 @@ var colorData = [
   [$color("#825af6"), $color("#6251f5")],
   [$color("#cc3ec8"), $color("#9f0cdd")]
 ]
+var dt = [
+  'at',
+  'bd',
+  'ex',
+  'ld',
+  // 'md',
+  'qca',
+  'rw',
+  'rm',
+  'ss',
+  't'
+]
 var homeURL = "https://translate.google.cn"
 var tkkRegex = /tkk:'(\d+\.\d+)'/gi;
 
@@ -160,40 +172,23 @@ function detailedTranslation(tk) {
 }
 
 function sendPost(tk) {
+  var dtQueryString = ""
+  for (var i = 0; i < dt.length; i ++) {
+    dtQueryString += "&dt="
+    dtQueryString += dt[i]
+  }
+  console.log(dt)
   $http.request({
     method: "POST",
-    url: "https://translate.google.cn/translate_a/single",
-    // client=webapp&sl=zh-CN&tl=en&hl=zh-CN&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&otf=1&ssel=3&tsel=3&kc=1&tk=712322.802833&q=哈哈
+    url: "https://translate.google.cn/translate_a/single?client=webapp&sl=auto&tl=zh-CN&hl=zh-CN" + dtQueryString + "&otf=1&ssel=0&tsel=0&kc=7&tk=" + tk + "&q=" + $("textBg").text,
     header: {
-      // "User-Agent": "iOSTranslate",
       "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36",
       "Content-Type": "application/x-www-form-urlencoded"
     },
-    body: {
-      "client": "webapp",
-      // "client": "webapp|gtx|t",
-      "sl": "en-US",
-      "tl": "zh-CN",
-      "hl": "zh-CN",
-      "dt": "[at,t]",
-      "ie": "UTF-8",
-      "oe": "UTF-8",
-      "otf": 1,
-      "ssel": 3,
-      "tsel": 3,
-      "kc": 1,
-      "tk": tk,
-      "q": $("textBg").text
-    },
     handler: function (resp) {
       $ui.loading(false)
-      console.log("resp type: " + typeof (resp))
-      console.log("resp: " + resp)
       var data = resp.data
-      console.log("data type: " + typeof (data))
       console.log("data: " + data)
-      var body = data[2]
-      console.log("body: " + body)
     }
   })
 }
