@@ -13,16 +13,16 @@ var colorData = [
   [$color("#cc3ec8"), $color("#9f0cdd")]
 ]
 var dt = [
-  'at',
-  'bd',
-  'ex',
-  'ld',
-  // 'md',
-  'qca',
-  'rw',
-  'rm',
-  'ss',
-  't'
+  'at', // 替代翻译
+  'bd', // 字典，以防源文本是一个单词（您可以获得文章翻译，反向翻译等）
+  'ex', // 例句
+  'ld', // 
+  'md', // 源文本的定义，如果它是一个单词
+  'qca', //
+  'rw', // 另见清单
+  // 'rm', // 源和翻译文本的转录/音译
+  'ss', // 源文本的同义词，如果它是一个单词
+  't' // 源文本的翻译
 ]
 var homeURL = "https://translate.google.cn"
 var tkkRegex = /tkk:'(\d+\.\d+)'/gi;
@@ -38,7 +38,7 @@ function translateView(orig) {
   // $ui.push({
   $ui.render({
     props: {
-      title: "翻译结果"
+      title: "CrazyTranslate"
     },
     views: [{
       type: "gradient",
@@ -111,7 +111,6 @@ function translateView(orig) {
   })
 }
 
-
 module.exports = {
   translateView: translateView
 }
@@ -119,7 +118,6 @@ module.exports = {
 function translate(isGetTK) {
   $ui.loading("Translating...")
   if (haveToGetTK()) {
-    // $ui.toast("Get detailed translation");
     translateByTK()
   } else {
     var transLg = cnTest()
@@ -173,11 +171,10 @@ function detailedTranslation(tk) {
 
 function sendPost(tk) {
   var dtQueryString = ""
-  for (var i = 0; i < dt.length; i ++) {
+  for (var i = 0; i < dt.length; i++) {
     dtQueryString += "&dt="
     dtQueryString += dt[i]
   }
-  console.log(dt)
   $http.request({
     method: "POST",
     url: "https://translate.google.cn/translate_a/single?client=webapp&sl=auto&tl=zh-CN&hl=zh-CN" + dtQueryString + "&otf=1&ssel=0&tsel=0&kc=7&tk=" + tk + "&q=" + $("textBg").text,
@@ -189,8 +186,77 @@ function sendPost(tk) {
       $ui.loading(false)
       var data = resp.data
       console.log("data: " + data)
+      showDetailedResult(data)
     }
   })
+}
+
+function showDetailedResult(body) {
+  var result = ""
+  for (var i = 0; i < body.length; i++) {
+    var line = "data[" + i + "]=" + body[i] + "\n"
+    console.log(line)
+  }
+  result += "中文翻译: "
+
+  body[0].forEach(function (obj) {
+    if (obj[0]) {
+      result += obj[0];
+    }
+  })
+  result += "\n\n"
+
+  if (body[12]) {
+    result += "英文释义: \n"
+    for (var i = 0; i<body[12].length;i++) {
+      var english = body[12][i]
+      console.log("english.length=" + english.length + ", " + english[0] + ", " + english[1] + ", " + english[2])
+      result += ("\n " + (i + 1) + ". " + english[0] + ": " + english[1][0][0] + "\n")
+      result += ("     示例: " + english[1][0][2] + "\n")
+    }
+    body[12].forEach(function(obj) {
+      console.log("obj.length: " + obj.length)
+      console.log("obj[1].length: " + obj[1].length)
+      // result += (" " + obj)
+      // r[1].forEach(m => {
+        // const [explain, nvl, example] = m;
+        // output.items.push({
+          // title: explain,
+          // subtitle: `英文解释 ${partOfSpeech} 示例: ${example}`,
+          // quicklookurl: `https://translate.google.cn/#view=home&op=translate&sl=${to}&tl=${from}&text=${encodeURIComponent(translation[1])}`,
+          // arg: explain,
+          // text: {
+            // copy: explain,
+            // largetype: `${explain}\n"${example}"`
+          // }
+        // });
+      // })
+    })
+  }
+
+  // console.log("body[2]=" + body[2] + ", body[8][0][0]=" + body[8][0][0])
+  if (body[2] === body[8][0][0]) {
+    // result.from.language.iso = body[2];
+  } else {
+    // result.from.language.didYouMean = true;
+    // result.from.language.iso = body[8][0][0];
+  }
+
+  if (body[7])
+    // console.log("body[7]=" + body[7] + ", body[7][0]=" + body[7][0])
+  if (body[7] && body[7][0]) {
+    var str = body[7][0];
+    str = str.replace(/<b><i>/g, '[');
+    str = str.replace(/<\/i><\/b>/g, ']');
+    result.from.text.value = str;
+    if (body[7][5] === true) {
+      // result.from.text.autoCorrected = true;
+    } else {
+      // result.from.text.didYouMean = true;
+    }
+  }
+
+  $("textBg").text = result
 }
 
 function translateByTK() {
@@ -199,9 +265,9 @@ function translateByTK() {
     handler: function (resp) {
       var data = resp.data;
       var tkk = tkkRegex.exec(data)[1]
-      console.log("tkk=" + tkk)
+      // console.log("tkk=" + tkk)
       var tk = getTK($("textBg").text, tkk)
-      console.log("tk=" + tk)
+      // console.log("tk=" + tk)
       detailedTranslation(tk)
     }
   });
