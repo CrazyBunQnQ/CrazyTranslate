@@ -12,6 +12,18 @@ var colorData = [
   [$color("#825af6"), $color("#6251f5")],
   [$color("#cc3ec8"), $color("#9f0cdd")]
 ]
+var dt = [
+  'at', // 替代翻译
+  'bd', // 字典，以防源文本是一个单词（您可以获得文章翻译，反向翻译等）
+  'ex', // 例句
+  'ld', // 
+  'md', // 源文本的定义，如果它是一个单词
+  'qca', //
+  'rw', // 另见清单
+  // 'rm', // 源和翻译文本的转录/音译
+  'ss', // 源文本的同义词，如果它是一个单词
+  't' // 源文本的翻译
+]
 var homeURL = "https://translate.google.cn"
 var tkkRegex = /tkk:'(\d+\.\d+)'/gi;
 
@@ -26,7 +38,7 @@ function translateView(orig) {
   // $ui.push({
   $ui.render({
     props: {
-      title: "翻译结果"
+      title: "CrazyTranslate"
     },
     views: [{
       type: "gradient",
@@ -99,115 +111,145 @@ function translateView(orig) {
   })
 }
 
-
 module.exports = {
   translateView: translateView
 }
 
 function translate(isGetTK) {
   $ui.loading("Translating...")
-  if (haveToGetTK()) {
-    // $ui.toast("Get detailed translation");
-    translateByTK()
+  if (isGetTK) {
+    var transWord = $("textBg").text
+    simpleTranslation()
+    translateByTK(transWord)
   } else {
-    var transLg = cnTest()
-    $http.request({
-      method: "POST",
-      url: "https://translate.google.cn/translate_a/single",
-      header: {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36",
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: {
-        "dt": "t",
-        "q": $("textBg").text,
-        "tl": transLg,
-        "ie": "UTF-8",
-        "sl": "auto",
-        "client": "ia",
-        "dj": "1"
-      },
-      handler: function (resp) {
-        $ui.loading(false)
-        var data = resp.data.sentences
-        var trans = ""
-        for (var i in data) {
-          var trans = trans + data[i].trans + "\n"
-        }
-        $("textBg").text = trans
-      }
-    })
+    simpleTranslation()
   }
 }
 
-function detailedTranslation(tk) {
-  opts = { raw: true, from: "auto", to: "zh-CN" };
-  var languages = require('./languages');
-  var e;
-  [opts.from, opts.to].forEach(function (lang) {
-    if (lang && !languages.isSupported(lang)) {
-      e.message = 'The language \'' + lang + '\' is not supported';
-      $ui.alert({
-        title: "Not Support '" + lang + "'",
-        message: "The language '" + lang + "' is not supported",
-      });
-      $ui.loading(false);
-      return
-    }
-  })
-
-  sendPost(tk)
-}
-
-function sendPost(tk) {
+function simpleTranslation() {
+  var transLg = cnTest()
   $http.request({
     method: "POST",
     url: "https://translate.google.cn/translate_a/single",
-    // client=webapp&sl=zh-CN&tl=en&hl=zh-CN&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&otf=1&ssel=3&tsel=3&kc=1&tk=712322.802833&q=哈哈
     header: {
-      // "User-Agent": "iOSTranslate",
       "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36",
       "Content-Type": "application/x-www-form-urlencoded"
     },
     body: {
-      "client": "webapp",
-      // "client": "webapp|gtx|t",
-      "sl": "en-US",
-      "tl": "zh-CN",
-      "hl": "zh-CN",
-      "dt": "[at,t]",
+      "dt": "t",
+      "q": $("textBg").text,
+      "tl": transLg,
       "ie": "UTF-8",
-      "oe": "UTF-8",
-      "otf": 1,
-      "ssel": 3,
-      "tsel": 3,
-      "kc": 1,
-      "tk": tk,
-      "q": $("textBg").text
+      "sl": "auto",
+      "client": "ia",
+      "dj": "1"
     },
     handler: function (resp) {
       $ui.loading(false)
-      console.log("resp type: " + typeof (resp))
-      console.log("resp: " + resp)
-      var data = resp.data
-      console.log("data type: " + typeof (data))
-      console.log("data: " + data)
-      var body = data[2]
-      console.log("body: " + body)
+      var data = resp.data.sentences
+      var trans = ""
+      for (var i in data) {
+        trans = trans + data[i].trans + "\n"
+      }
+      $("textBg").text = trans
     }
   })
 }
 
-function translateByTK() {
+function detailedTranslation(tk, transWord) {
+  var dtQueryString = ""
+  for (var i = 0; i < dt.length; i++) {
+    dtQueryString += "&dt="
+    dtQueryString += dt[i]
+  }
+  $http.request({
+    method: "POST",
+    url: "https://translate.google.cn/translate_a/single?client=webapp&sl=auto&tl=zh-CN&hl=zh-CN" + dtQueryString + "&otf=1&ssel=0&tsel=0&kc=7&tk=" + tk + "&q=" + transWord,
+    header: {
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36",
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    handler: function (resp) {
+      $ui.loading(false)
+      var data = resp.data
+      console.log("data: " + data)
+      showDetailedResult(data)
+    }
+  })
+}
+
+function showDetailedResult(body) {
+  var result = ""
+  for (var i = 0; i < body.length; i++) {
+    var line = "data[" + i + "]=" + body[i] + "\n"
+    console.log(line)
+  }
+  result += "中文翻译: "
+
+  body[0].forEach(function (obj) {
+    if (obj[0]) {
+      result += obj[0];
+    }
+  })
+  result += "\n\n"
+
+  if (body[12]) {
+    result += "英文释义: \n"
+    for (var j = 0; j < body[12].length; j++) {
+      var english = body[12][j]
+      result += ("\n " + (j + 1) + ". " + english[0] + ": " + english[1][0][0] + "\n")
+      result += ("     示例: " + english[1][0][2] + "\n")
+    }
+  }
+
+  if (body[1]) {
+    result += "\n近义词: \n"
+    for (var j = 0; j < body[1].length; j++) {
+      var jin = body[1][j]
+      result += "\n " + (j + 1) + ". " + jin[0] + ": "
+      for (var k = 0; k < jin.length; k++) {
+        if (jin[1][k])
+          result += (k == 0 ? jin[1][k] : (", " + jin[1][k]))
+        //         + " " + jin[2][0][k]
+      }
+    }
+  }
+
+  // console.log("body[2]=" + body[2] + ", body[8][0][0]=" + body[8][0][0])
+  if (body[2] === body[8][0][0]) {
+    // result.from.language.iso = body[2];
+  } else {
+    // result.from.language.didYouMean = true;
+    // result.from.language.iso = body[8][0][0];
+  }
+
+  if (body[7])
+    // console.log("body[7]=" + body[7] + ", body[7][0]=" + body[7][0])
+    if (body[7] && body[7][0]) {
+      var str = body[7][0];
+      str = str.replace(/<b><i>/g, '[');
+      str = str.replace(/<\/i><\/b>/g, ']');
+      result.from.text.value = str;
+      if (body[7][5] === true) {
+        // result.from.text.autoCorrected = true;
+      } else {
+        // result.from.text.didYouMean = true;
+      }
+    }
+
+  $("textBg").text = result
+}
+
+function translateByTK(transWord) {
   $http.get({
     url: homeURL,
     handler: function (resp) {
       var data = resp.data;
       var tkk = tkkRegex.exec(data)[1]
-      console.log("tkk=" + tkk)
-      var tk = getTK($("textBg").text, tkk)
-      console.log("tk=" + tk)
-      detailedTranslation(tk)
+      // console.log("tkk=" + tkk)
+      var tk = getTK(transWord, tkk)
+      // console.log("tk=" + tk)
+      detailedTranslation(tk, transWord)
     }
   });
 }
@@ -279,7 +321,7 @@ function getTK(s, tkk) {
   var Zb = "+-3^+b+-f"
 
   var aa = ka
-  for (var f = 0; f < e.length; f++) {
+  for (f = 0; f < e.length; f++) {
     aa += e[f]
     aa = r(aa, Sb)
   }
@@ -319,10 +361,6 @@ function suint32(s) {
 }
 
 function uint32(a) {
-  return a
-}
-
-function int(a) {
   return a
 }
 
