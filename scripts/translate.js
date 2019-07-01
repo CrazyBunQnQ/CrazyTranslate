@@ -201,7 +201,7 @@ function showDetailedResult(body) {
       result += ("     示例: " + english[1][0][2] + "\n")
     }
   }
-  
+
   if (body[1]) {
     result += "\n近义词: \n"
     for (var j = 0; j < body[1].length; j++) {
@@ -209,8 +209,7 @@ function showDetailedResult(body) {
       result += "\n " + (j + 1) + ". " + jin[0] + ": "
       for (var k = 0; k < jin.length; k++) {
         if (jin[1][k])
-        result += (k == 0 ? jin[1][k]:(", " + jin[1][k]))
-//         + " " + jin[2][0][k]
+          result += (k == 0 ? jin[1][k] : (", " + jin[1][k]))
       }
     }
   }
