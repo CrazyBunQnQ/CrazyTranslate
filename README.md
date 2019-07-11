@@ -16,9 +16,15 @@ This is just a script based on my own needs, but I believe many people have the 
 
 ### Running effect
 
-![Translate Sentence](http://wx3.sinaimg.cn/large/a6e9cb00ly1g4vmmh0th0g20u01hckjo.gif)
-![Translate Single Word](http://wx2.sinaimg.cn/large/a6e9cb00ly1g4vmq96cddg20u01hc4qx.gif)
+![Translate Sentence](http://wx3.sinaimg.cn/large/a6e9cb00ly1g4vmmh0th0g20u01hckjo.gif) ![Translate Single Word](http://wx2.sinaimg.cn/large/a6e9cb00ly1g4vmq96cddg20u01hc4qx.gif)
 
 ### Thanks
 
 [StackOverflowError](https://weibo.com/0x00eeee)'s [JSBox](https://jsboxbbs.com) platform.
+
+<style type="text/css">
+img {
+    align: center;
+    width: 45%;
+}
+</style>
