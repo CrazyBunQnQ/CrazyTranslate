@@ -16,7 +16,7 @@ This is just a script based on my own needs, but I believe many people have the 
 
 ### Running effect
 
-![Translate Sentence](http://wx1.sinaimg.cn/large/a6e9cb00ly1g4vs501bl1g20a00hs7wh.gif) ![Translate Single Word](http://wx1.sinaimg.cn/large/a6e9cb00ly1g4vs3rs4h5g20a00hskjm.gif)
+<p align="center">![Translate Sentence](assets/CrazyTranslateSentence.gif) ![Translate Single Word](assets/CrazyTranslateWord.gif)</p>
 
 ### Thanks
 
