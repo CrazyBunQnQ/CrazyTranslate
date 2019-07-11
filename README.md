@@ -2,6 +2,8 @@
 
 CrazyTranslate is a JSBox script for Google translation. It is light and fast, realizing the function of approximate delimit word translation.
 
+> Use `translate.google.cn` for translation so support in mainland China.
+
 ### What can do
 
 - [recommended] Select text and share to JSBox for quick translation.
